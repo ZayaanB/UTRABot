@@ -1,8 +1,0 @@
-pyserial
-python-dotenv
-pymongo
-google-generativeai
-snowflake-connector-python
-solana
-solders
-base58
