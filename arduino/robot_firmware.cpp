@@ -1,28 +1,27 @@
 #include <Arduino.h>
-#include <Wire.h>
 #include <Servo.h>
 
-// ---------- OPTIONAL: TCS34725 color sensor ----------
-#include "Adafruit_TCS34725.h"
-// If your color sensor is not TCS34725, replace this section with your sensor library.
+// =====================
+// PIN DEFINITIONS (EDIT THESE TO MATCH YOUR WIRING)
+// =====================
 
-Adafruit_TCS34725 tcs = Adafruit_TCS34725(
-  TCS34725_INTEGRATIONTIME_50MS,
-  TCS34725_GAIN_4X
-);
+// IR sensors (analog)
+const int IR_L_PIN = A0;     // IR left
+const int IR_R_PIN = A1;     // IR right
 
-// ---------- Pins (EDIT THESE) ----------
-const int IR_L_PIN = A0;     // IR left analog
-const int IR_R_PIN = A1;     // IR right analog
+// Ultrasonic sensor (HC-SR04 style)
+const int US_TRIG_PIN = 7;
+const int US_ECHO_PIN = 8;
 
-const int US_TRIG_PIN = 7;   // ultrasonic trig
-const int US_ECHO_PIN = 8;   // ultrasonic echo
+// Battery voltage divider input (analog)
+const int BAT_PIN = A2;
 
-const int BAT_PIN = A2;      // battery divider -> analog
-// Battery divider: Vbat -> R1 -> analog -> R2 -> GND
-// Vbat = analogV * (R1+R2)/R2
+// V575 Color Sensor (analog outputs R/G/B)
+const int COLOR_R_PIN = A3;   // V575 "R" output
+const int COLOR_G_PIN = A4;   // V575 "G" output
+const int COLOR_B_PIN = A5;   // V575 "B" output
 
-// Motor driver pins (generic H-bridge)
+// Motor driver pins (generic H-bridge: IN1/IN2/PWM per motor)
 const int L_IN1 = 2;
 const int L_IN2 = 3;
 const int L_PWM = 5;
@@ -35,33 +34,46 @@ const int R_PWM = 9;
 const int SERVO_CLAW_PIN = 10;
 const int SERVO_LAUNCH_PIN = 11;
 
-Servo servoClaw;
-Servo servoLaunch;
+// =====================
+// TUNING CONSTANTS (YOU MUST CALIBRATE THESE)
+// =====================
 
-// ---------- Tuning ----------
-int IR_THRESH = 500;          // EDIT after calibration
-int OBSTACLE_CM = 12;         // obstacle distance threshold
+int IR_THRESH = 500;          // IR threshold for line detection (calibrate!)
+int OBSTACLE_CM = 12;         // stop if obstacle closer than this
 
-// Servo positions (EDIT)
+// Servo angles (calibrate!)
 int CLAW_OPEN = 20;
 int CLAW_CLOSE = 95;
+
 int LAUNCH_READY = 20;
 int LAUNCH_FIRE = 110;
 
-// Battery divider constants (EDIT)
-const float ADC_REF = 5.0;         // UNO typically 5V reference
+// Battery divider constants (set to your resistor values!)
+const float ADC_REF = 5.0;     // UNO is typically 5V
 const float ADC_MAX = 1023.0;
-const float R1 = 10000.0;          // example 10k
-const float R2 = 10000.0;          // example 10k
 
-// ---------- State ----------
+// If you use a voltage divider: Vbat -> R1 -> analog -> R2 -> GND
+// Vbat = Vanalog * (R1 + R2) / R2
+const float R1 = 10000.0;   // example 10k
+const float R2 = 10000.0;   // example 10k
+
+// =====================
+// GLOBALS
+// =====================
+
+Servo servoClaw;
+Servo servoLaunch;
+
 String mode = "IDLE";
 
-// Current drive command
+// current drive command
 int cmdLeft = 0;
 int cmdRight = 0;
 
-// ---------- Helpers ----------
+// =====================
+// SENSOR HELPERS
+// =====================
+
 float readBatteryV() {
   int raw = analogRead(BAT_PIN);
   float v = (raw * ADC_REF) / ADC_MAX;
@@ -78,12 +90,24 @@ long readUltrasonicCM() {
 
   long duration = pulseIn(US_ECHO_PIN, HIGH, 25000); // timeout ~25ms
   if (duration == 0) return 999;
-  long cm = duration / 58; // approx
+  long cm = duration / 58;
   return cm;
 }
 
+// V575 analog RGB (0..1023)
+void readRGB(uint16_t &r, uint16_t &g, uint16_t &b) {
+  r = analogRead(COLOR_R_PIN);
+  g = analogRead(COLOR_G_PIN);
+  b = analogRead(COLOR_B_PIN);
+}
+
+// =====================
+// MOTOR HELPERS
+// =====================
+
 void setMotor(int in1, int in2, int pwmPin, int val) {
   val = constrain(val, -255, 255);
+
   if (val >= 0) {
     digitalWrite(in1, HIGH);
     digitalWrite(in2, LOW);
@@ -100,16 +124,20 @@ void driveLR(int left, int right) {
   setMotor(R_IN1, R_IN2, R_PWM, right);
 }
 
+// =====================
+// ACTION MACROS (SERVOS)
+// =====================
+
 void doAction(const String& name) {
   if (name == "STOP") {
-    cmdLeft = 0; cmdRight = 0;
+    cmdLeft = 0;
+    cmdRight = 0;
     mode = "STOP";
   }
   else if (name == "PICKUP_BOX") {
     mode = "PICKUP_BOX";
-    // Simple: open -> lower -> close (you'll adjust timings for your arm geometry)
     servoClaw.write(CLAW_OPEN);
-    delay(300);
+    delay(250);
     servoClaw.write(CLAW_CLOSE);
     delay(400);
   }
@@ -129,20 +157,10 @@ void doAction(const String& name) {
   }
 }
 
-bool readLineLeft(int ir)  { return ir < IR_THRESH; } // depends on sensor; invert if needed
-bool readLineRight(int ir) { return ir < IR_THRESH; }
+// =====================
+// SERIAL INPUT HELPERS (Minimal JSON parsing)
+// =====================
 
-// Very simple RGB fetch; if no sensor, returns zeros
-void readRGB(uint16_t &r, uint16_t &g, uint16_t &b) {
-  uint16_t c;
-  if (tcs.begin()) {
-    tcs.getRawData(&r, &g, &b, &c);
-  } else {
-    r = g = b = 0;
-  }
-}
-
-// ---------- Serial JSON parsing (minimal) ----------
 String readLine() {
   static String buf = "";
   while (Serial.available()) {
@@ -158,7 +176,7 @@ String readLine() {
   return "";
 }
 
-// tiny helpers: extract int field from simple JSON {"left":123}
+// Extract int from very simple JSON: {"left":123}
 int extractInt(const String& s, const String& key, int defVal) {
   int k = s.indexOf("\"" + key + "\"");
   if (k < 0) return defVal;
@@ -172,6 +190,7 @@ int extractInt(const String& s, const String& key, int defVal) {
   return val.toInt();
 }
 
+// Extract string from simple JSON: {"cmd":"drive"}
 String extractString(const String& s, const String& key, const String& defVal) {
   int k = s.indexOf("\"" + key + "\"");
   if (k < 0) return defVal;
@@ -184,15 +203,32 @@ String extractString(const String& s, const String& key, const String& defVal) {
   return s.substring(q1 + 1, q2);
 }
 
+// =====================
+// SETUP + LOOP
+// =====================
+
 void setup() {
   Serial.begin(115200);
 
+  // Ultrasonic
   pinMode(US_TRIG_PIN, OUTPUT);
   pinMode(US_ECHO_PIN, INPUT);
 
-  pinMode(L_IN1, OUTPUT); pinMode(L_IN2, OUTPUT); pinMode(L_PWM, OUTPUT);
-  pinMode(R_IN1, OUTPUT); pinMode(R_IN2, OUTPUT); pinMode(R_PWM, OUTPUT);
+  // Motors
+  pinMode(L_IN1, OUTPUT);
+  pinMode(L_IN2, OUTPUT);
+  pinMode(L_PWM, OUTPUT);
 
+  pinMode(R_IN1, OUTPUT);
+  pinMode(R_IN2, OUTPUT);
+  pinMode(R_PWM, OUTPUT);
+
+  // V575 color sensor pins
+  pinMode(COLOR_R_PIN, INPUT);
+  pinMode(COLOR_G_PIN, INPUT);
+  pinMode(COLOR_B_PIN, INPUT);
+
+  // Servos
   servoClaw.attach(SERVO_CLAW_PIN);
   servoLaunch.attach(SERVO_LAUNCH_PIN);
   servoClaw.write(CLAW_OPEN);
@@ -219,14 +255,14 @@ void loop() {
       cmdLeft = extractInt(line, "left", 0);
       cmdRight = extractInt(line, "right", 0);
       mode = "DRIVE";
-    } else if (cmd == "action") {
+    }
+    else if (cmd == "action") {
       String name = extractString(line, "name", "");
-      doAction(name);
+      if (name.length() > 0) doAction(name);
     }
   }
 
-  // ---- Apply drive ----
-  // Safety: if obstacle too close, slow/stop (controller can override but this saves crashes)
+  // ---- Apply drive with safety stop ----
   if (distCm < OBSTACLE_CM && mode == "DRIVE") {
     driveLR(0, 0);
     mode = "OBSTACLE_STOP";
@@ -234,25 +270,29 @@ void loop() {
     driveLR(cmdLeft, cmdRight);
   }
 
-  // ---- Emit telemetry ----
-  // JSON line
+  // ---- Emit telemetry as JSON line ----
   Serial.print("{\"t_ms\":");
   Serial.print(millis());
+
   Serial.print(",\"irL\":");
   Serial.print(irL);
   Serial.print(",\"irR\":");
   Serial.print(irR);
+
   Serial.print(",\"dist_cm\":");
   Serial.print(distCm);
+
   Serial.print(",\"bat_v\":");
   Serial.print(batV, 3);
+
   Serial.print(",\"rgb\":[");
   Serial.print(r); Serial.print(",");
   Serial.print(g); Serial.print(",");
   Serial.print(b); Serial.print("]");
+
   Serial.print(",\"mode\":\"");
   Serial.print(mode);
   Serial.println("\"}");
 
-  delay(50); // ~20 Hz
+  delay(50); // ~20Hz telemetry
 }
