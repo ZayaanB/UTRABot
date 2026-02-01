@@ -3,7 +3,7 @@
 ## What is TrusToken?
 TrusToken is a proof-of-impact marketplace built for **UTRA Hacks**. It turns real-world sustainable or charitable actions into verifiable, on-chain “impact credits” by combining **Google Gemini** for multimodal verification, and **Solana** for minting.
 
-A user submits evidence of a real-world good deed (photo, receipt, or short video) along with a short claim (e.g., “bike commute”). The backend verifies the claim using Gemini. If the claim is validated, TrusToken mints an Impact NFT on Solana. This NFT acts as a portable, auditable record of the verified action and can be displayed, traded, or redeemed for rewards.
+A user submits evidence of a real-world good deed (through a photo) along with a short claim (e.g., “bike commute”). The backend verifies the claim using Gemini. If the claim is validated, TrusToken mints an Impact NFT on Solana. This NFT acts as a portable, auditable record of the verified action and can be displayed, traded, or redeemed for rewards.
 
 ## Problem
 Many sustainability and charity initiatives struggle with one core issue: **trust**. Verifying real-world actions is hard to scale. Manual review is slow and subjective, while fully self-reported systems are easy to exploit. At the same time, impact reporting is often siloed in private databases or screenshots, making it difficult to audit, compare, or reuse across platforms.
