@@ -11,9 +11,11 @@ Many sustainability and charity initiatives struggle with one core issue: **trus
 Without measurable verification and a transparent record, incentive programs either become too expensive to run or too easy to game.
 
 ## Solution
-TrusToken provides a verification + minting pipeline that is designed to be fast enough for a live demo but structured enough to be extended into a real system.
+TrusToken proposes a solution that is valuable precisely because it makes verification repeatable and consistent. Instead of relying on subjective manual review, it introduces a structured pipeline where users submit evidence (a photo, receipt, or short video) and the system checks whether that evidence supports a specific claim.
 
-The flow works as follows:
+TrusToken has the potential to make sustainability and community reward programs actually work at scale, as it verifies real-world actions before rewards are given. We also aim to increase participation in low-carbon and community actions, as it turns actions into verified credits people can earn and repeat.
+
+The process works as follows:
 1. A user uploads evidence (image/video/receipt) and selects a category with a short description.
 2. Gemini performs multimodal verification by checking whether the evidence matches the claim, whether the submission quality is sufficient, and whether there are fraud indicators.
 3. Gemini returns a structured result (verified/not verified, confidence, flags) and generates a human-readable **impact summary**.
