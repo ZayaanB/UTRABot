@@ -56,6 +56,16 @@ TrusToken is designed to keep verification consistent by using category-specific
 ### Solana minting
 If verification passes, the backend mints an Impact NFT on Solana. Metadata includes category, timestamp, proof reference (URI and/or hash), and the impact summary (or a reference to off-chain metadata). Solana’s speed and low fees make repeated minting feasible for “micro-impact” actions.
 
+
+**Supported categories:**
+- **Low-Carbon Transport** : bike commute, public transport trip  
+- **Waste Reduction** : recycling drop-off, reuse/refill actions  
+- **Community Volunteering** : volunteering attendance proof  
+- **Donation** — : donation receipt/confirmation  
+- **Energy Saving** — : documented energy-saving action or proof  
+- **Biodiversity** — : planting actions, habitat-friendly activities  
+
+
 ### Rewards
 Once minted, NFTs can represent a user’s impact history and can be made redeemable for rewards (partner perks, points, access) depending on the rules of the program. Reward logic can remain off-chain for simplicity during the hackathon.
 
