@@ -16,7 +16,7 @@ TrusToken proposes a solution that is valuable precisely because it makes verifi
 TrusToken has the potential to make sustainability and community reward programs actually work at scale, as it verifies real-world actions before rewards are given. We also aim to increase participation in low-carbon and community actions, as it turns actions into verified credits people can earn and repeat.
 
 The process works as follows:
-1. A user uploads evidence (image/video/receipt) and selects a category with a short description.
+1. A user uploads evidence (image) and selects a category with a short description.
 2. Gemini performs multimodal verification by checking whether the evidence matches the claim, whether the submission quality is sufficient, and whether there are fraud indicators.
 3. Gemini returns a structured result (verified/not verified, confidence, flags) and generates a human-readable **impact summary**.
 4. If verified, the backend mints an Impact NFT on Solana containing the category, timestamp, proof reference (URI and/or hash), and the Gemini-generated impact summary (or a reference to it).
