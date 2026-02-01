@@ -63,9 +63,9 @@ If verification passes, the backend mints an Impact NFT on Solana. Metadata incl
 - **Low-Carbon Transport** : bike commute, public transport trip  
 - **Waste Reduction** : recycling drop-off, reuse/refill actions  
 - **Community Volunteering** : volunteering attendance proof  
-- **Donation** — : donation receipt/confirmation  
-- **Energy Saving** — : documented energy-saving action or proof  
-- **Biodiversity** — : planting actions, habitat-friendly activities  
+- **Donation** : donation receipt/confirmation  
+- **Energy Saving** : documented energy-saving action or proof  
+- **Biodiversity** : planting actions, habitat-friendly activities  
 
 
 ### Rewards
