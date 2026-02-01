@@ -1,116 +1,70 @@
-# 🪙 TrusToken
+# TrusToken
 
 ## What is TrusToken?
-Trustoken is a proof-of-impact marketplace built for **UTRA Hacks**. It turns real-world sustainable or charitable actions into verifiable, on-chain “impact credits” by combining:
+TrusToken is a proof-of-impact marketplace built for **UTRA Hacks**. It turns real-world sustainable or charitable actions into verifiable, on-chain “impact credits” by combining **Google Gemini** for multimodal verification, **Solana** for transparent minting, and a **DigitalOcean-hosted backend** for storage and API endpoints.
 
-- AI-based verification using the Google Gemini API  
-- On-chain minting and public auditability on Solana  
-- A deployable backend hosted on DigitalOcean for storage and API endpoints  
-
-How it works is that a user submits evidence of a real-world good deed (photo, receipt, or short video). The backend verifies the claim using Gemini. If the claim is validated, the system mints an Impact NFT on Solana that represents the verified action and can be displayed, traded, or redeemed for rewards.
+A user submits evidence of a real-world good deed (photo, receipt, or short video) along with a short claim (e.g., “bike commute”). The backend verifies the claim using Gemini. If the claim is validated, TrusToken mints an Impact NFT on Solana. This NFT acts as a portable, auditable record of the verified action and can be displayed, traded, or redeemed for rewards.
 
 ## Problem
-Many sustainability and charity initiatives struggle with one core issue: **trust**.
+Many sustainability and charity initiatives struggle with one core issue: **trust**. Verifying real-world actions is hard to scale. Manual review is slow and subjective, while fully self-reported systems are easy to exploit. At the same time, impact reporting is often siloed in private databases or screenshots, making it difficult to audit, compare, or reuse across platforms.
 
-- Individuals and organizations want to reward positive actions, but verifying proof is time-consuming, inconsistent, and often subjective.
-- Impact reporting is often siloed (private databases, screenshots, unverifiable claims), which makes auditing and interoperability difficult.
-- If incentives are involved, fraud and low-quality submissions become a major risk.
-
-Without measureable verification and a transparent record, it’s hard to build credible incentive programs for real-world impact.
+Without measurable verification and a transparent record, incentive programs either become too expensive to run or too easy to game.
 
 ## Solution
-Trustoken provides a scalable verification + ledger pipeline:
+TrusToken provides a verification + minting pipeline that is designed to be fast enough for a live demo but structured enough to be extended into a real system.
 
-1. **Evidence submission:** users upload proof of an action and provide a short description/category.
-2. **Multimodal verification:** Gemini evaluates the evidence and determines whether it supports the claim.
-3. **Structured verification output:** Gemini produces:
-   - a pass/fail decision (or a score/threshold)
-   - reasoning flags (fraud suspicion, mismatch, low-quality evidence)
-   - a human-readable “impact summary”
-4. **On-chain minting:** verified claims are minted as Impact NFTs on Solana with metadata linking to the proof and the verification summary.
+The flow works as follows:
+1. A user uploads evidence (image/video/receipt) and selects a category with a short description.
+2. Gemini performs multimodal verification by checking whether the evidence matches the claim, whether the submission quality is sufficient, and whether there are fraud indicators.
+3. Gemini returns a structured result (verified/not verified, confidence, flags) and generates a human-readable **impact summary**.
+4. If verified, the backend mints an Impact NFT on Solana containing the category, timestamp, proof reference (URI and/or hash), and the Gemini-generated impact summary (or a reference to it).
 
-This creates a consistent and automatable process for turning real-world actions into verifiable digital credits.
+This turns “good deeds” into verifiable digital credits that can be used in incentive systems without requiring constant manual review.
 
 ## Why TrusToken?
-TrusToken’s value is enabling **credible impact incentives** at scale:
+TrusToken’s value is enabling **credible impact incentives** at scale.
 
-- **For individuals:** it makes positive actions measurable and recognized with a durable credential.
-- **For communities and organizers:** it supports challenge campaigns (e.g., commuting, cleanups, donation drives) with less manual review.
-- **For partners and sponsors:** it enables reward programs with stronger guarantees that rewards correspond to legitimate actions.
-- **For transparency:** it creates a public, auditable trail of verified impact events (while keeping sensitive media off-chain).
+For individuals, it makes positive actions measurable and recognizable through a durable credential. For communities and organizers, it reduces manual verification overhead for challenges and campaigns (commutes, cleanups, donation drives). For partners and sponsors, it improves confidence that rewards map to legitimate actions rather than low-quality or fraudulent submissions. For transparency, it creates a public ledger of verified impact events while keeping sensitive evidence off-chain.
 
-The broader implication is that “doing good” can be integrated into incentive systems without collapsing under manual verification costs or widespread fraud.
+The broader idea is simple: if “doing good” can be verified reliably, it becomes much easier to reward and coordinate at scale.
 
 ## Intended impact
-TrusToken demonstrates a pathway toward:
-
-- Better participation in sustainability initiatives through lightweight rewards
-- More trustworthy impact reporting for community programs
-- Transparent records that can be reused across platforms (wallets, marketplaces, partner reward portals)
-- Reduced administrative burden by shifting verification to an AI-assisted pipeline with clear criteria
+TrusToken demonstrates a pathway toward more practical sustainability incentives:
+- increasing participation through lightweight rewards and recognition
+- improving the credibility of impact reporting for community programs
+- creating portable records that can be reused across platforms (wallets, marketplaces, partner reward portals)
+- reducing administrative burden by shifting verification to an AI-assisted pipeline with clear rules
 
 ## Goals for UTRA Hacks
-Trustoken is designed to compete for:
-- **Best use of Gemini API:** Gemini is the core verification engine (multimodal analysis, fraud detection, summary generation).
-- **Best use of Solana:** Solana is used for minting verifiable, low-fee, fast-to-issue Impact NFTs and for public transparency.
+TrusToken is designed to compete for:
+- **Best use of Gemini API:** Gemini is the core trust layer (multimodal verification, fraud/quality checks, impact summary generation).
+- **Best use of Solana:** Solana is used for fast, low-fee minting and a public, auditable record of verified impact.
 
 ## How it works (technical)
-### 1) Evidence intake
-Users provide:
-- Evidence: photo / receipt image / short video
-- Claim metadata: category (e.g., “bike commute”), short description, optional contextual fields (time, location region, etc.)
+### Evidence intake
+Users provide evidence (photo / receipt / short video) and basic claim metadata such as category and description. Evidence is stored off-chain (e.g., object storage). The system stores references (URLs and/or hashes) needed to verify integrity without exposing sensitive data on-chain.
 
-Evidence is stored off-chain (e.g., object storage). The system stores references (URLs and/or hashes) needed to verify integrity.
+### Gemini verification
+Gemini evaluates whether the evidence plausibly supports the claim, checks submission quality (blurry/irrelevant/incomplete), and looks for fraud indicators (mismatched context, suspicious repetition patterns). It outputs:
+- `verified` (boolean or score + threshold)
+- `confidence` (numeric estimate)
+- `flags` (reasons for rejection or caution)
+- `impact_summary` (plain-language explanation)
 
-### 2) Gemini verification
-Gemini performs multimodal verification by evaluating:
-- Whether the evidence plausibly matches the category and description
-- Evidence quality (is it too blurry, irrelevant, incomplete?)
-- Potential fraud indicators (reused images, inconsistent context, suspicious patterns)
+TrusToken is designed to keep verification consistent by using category-specific rubrics (what qualifies, what does not, and what evidence is expected).
 
-Gemini outputs structured information such as:
-- `verified`: boolean (or score + threshold)
-- `confidence`: numeric estimate
-- `flags`: list of reasons for rejection or caution
-- `impact_summary`: plain-language explanation of the verified action
+### Solana minting
+If verification passes, the backend mints an Impact NFT on Solana. Metadata includes category, timestamp, proof reference (URI and/or hash), and the impact summary (or a reference to off-chain metadata). Solana’s speed and low fees make repeated minting feasible for “micro-impact” actions.
 
-A strong design choice is to keep the verification rubric consistent and category-based:
-- Each category can have guidelines (what qualifies, what does not, what evidence is expected).
-- This reduces ambiguity and improves repeatability.
+### Rewards
+Once minted, NFTs can represent a user’s impact history and can be made redeemable for rewards (partner perks, points, access) depending on the rules of the program. Reward logic can remain off-chain for simplicity during the hackathon.
 
-### 3) Minting on Solana
-If verification passes:
-- The backend triggers minting of an “Impact NFT” on Solana.
-- NFT metadata includes:
-  - impact category and timestamp
-  - a proof reference (URI) and/or content hash
-  - the Gemini-generated impact summary (or a hash + off-chain metadata URI)
-  - verification attributes (confidence band, flags cleared)
+## Trust, integrity, and privacy
+TrusToken balances transparency with privacy by keeping evidence off-chain, storing hashes for integrity, and minimizing on-chain metadata. Basic anti-abuse controls can include rate limiting, duplicate detection, and repeated-submission checks. Receipts may contain personal information, so redaction or strict handling policies should be applied in production settings.
 
-Solana’s speed and fee structure make it practical for “micro-impact” actions where frequent minting must remain cheap.
-
-### 4) Rewards and marketplace behavior
-Once minted, NFTs can be:
-- Displayed as a user’s impact history
-- Traded (if the design allows transferability)
-- Redeemed for partner rewards (coupon codes, points, access, etc.)
-
-Reward logic can remain off-chain or be partially on-chain depending on scope.
-
-## Trust, integrity, and privacy considerations
-Trustoken is a “proof of impact” system, so it must balance transparency and privacy:
-
-- **Off-chain media storage:** evidence is not stored on-chain to avoid leaking personal details.
-- **Content hashing:** store hashes so the evidence can be integrity-checked without publishing it.
-- **Minimal metadata on-chain:** include only what is needed for auditability and replay prevention.
-- **Fraud controls:** rate limits, duplicate detection (hashing), and repeated-submission checks can reduce abuse.
-- **Sensitive data handling:** receipts may contain personal info; consider redaction or rules that forbid sensitive fields.
-
+## Setup
 ### Prerequisites
-- Node.js 18+ (recommended)
-- A Gemini API key
-- Solana wallet/keypair for mint authority
-- Solana RPC URL (Devnet recommended)
+Node.js 18+, a Gemini API key, and a Solana wallet/keypair for mint authority. Use Solana Devnet for hackathon testing.
 
 ### Environment variables
 Create a `.env` based on `.env.example` and add:
