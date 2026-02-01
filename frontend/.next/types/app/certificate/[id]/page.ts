@@ -1,4 +1,4 @@
-// File: C:\Users\evant\Cs_project\UTRABot-1\frontend\app\certificate\[id]\page.tsx
+// File: C:\Users\evant\Cs_project\UTRABotv4\frontend\app\certificate\[id]\page.tsx
 import * as entry from '../../../../../app/certificate/[id]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

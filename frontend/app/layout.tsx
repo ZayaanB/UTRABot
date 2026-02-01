@@ -7,6 +7,9 @@ import type { ReactNode } from "react";
 export const metadata: Metadata = {
   title: "TrusToken",
   description: "Upload sustainable actions → verify with AI → mint Solana NFT certificate",
+  icons: {
+    icon: "/icon.png?v=2",
+  },
 };
 
 function LogoMark({ size = 20 }: { size?: number }) {
@@ -38,10 +41,7 @@ function LogoMark({ size = 20 }: { size?: number }) {
 
 function Brand({ size = 20, className = "" }: { size?: number; className?: string }) {
   return (
-    <span
-      className={className}
-      style={{ display: "inline-flex", alignItems: "center", gap: 10 }}
-    >
+    <span className={className} style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
       <LogoMark size={size} />
       <span style={{ lineHeight: 1 }}>TrusToken</span>
     </span>

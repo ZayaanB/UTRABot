@@ -1,3 +1,4 @@
+// frontend/app/page.tsx
 "use client";
 
 import { useId, useMemo, useState } from "react";
@@ -8,13 +9,7 @@ function LogoMark({ size = 34 }: { size?: number }) {
   const gradId = `tt-gradient-${uid}`;
 
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 200 200"
-      aria-hidden="true"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 200 200" aria-hidden="true">
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#8B5CF6" />
@@ -60,12 +55,8 @@ export default function Home() {
 
   const canSubmit = useMemo(() => !!file && !!desc.trim() && step !== "uploading", [file, desc, step]);
 
-  // Backend base URL (Express). Set either:
-  // NEXT_PUBLIC_API_BASE=http://localhost:4000
-  // or NEXT_PUBLIC_BACKEND_URL=http://localhost:4000
   const API_BASE =
     process.env.NEXT_PUBLIC_API_BASE || process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
-
   const apiUrl = (path: string) => `${API_BASE}${path}`;
 
   function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -85,10 +76,7 @@ export default function Home() {
       fd.append("description", desc.trim());
       if (wallet.trim()) fd.append("wallet", wallet.trim());
 
-      const res = await fetch(apiUrl("/api/upload"), {
-        method: "POST",
-        body: fd,
-      });
+      const res = await fetch(apiUrl("/api/upload"), { method: "POST", body: fd });
 
       if (!res.ok) {
         let msg = "Upload failed.";
@@ -103,7 +91,6 @@ export default function Home() {
       const id = data?.id || data?.requestId || data?.jobId;
       if (!id) throw new Error("No id returned from /api/upload.");
 
-      // 1) Verify with AI
       setStatus("Verifying with AI…");
       const vRes = await fetch(apiUrl(`/api/verify/${id}`), { method: "POST" });
       if (!vRes.ok) {
@@ -111,7 +98,6 @@ export default function Home() {
         throw new Error(j?.error || j?.message || "Verification failed.");
       }
 
-      // 2) Try minting (may fail if confidence < threshold; still show certificate)
       setStatus("Minting certificate (if eligible)…");
       const mRes = await fetch(apiUrl(`/api/mint/${id}`), { method: "POST" });
       if (!mRes.ok) {
@@ -151,53 +137,132 @@ export default function Home() {
         <span className="badge">Devnet MVP</span>
       </div>
 
-      <div className="card">
-        <div className="stack">
-          <div className="grid2">
+      {/* Wrapper adds space between About + Entry form */}
+      <div style={{ display: "grid", gap: 18 }}>
+        {/* About Us section */}
+        <section className="card" id="about">
+          <div className="stack">
             <div className="kv">
-              <div className="label">Image</div>
-              <input className="input" type="file" accept="image/*" onChange={onFileChange} />
-              <div className="muted">Choose a photo of your action (recycling, transit, biking, etc.).</div>
+              <div className="label">About Us</div>
+              <h2 style={{ margin: "6px 0 8px", fontSize: 22, lineHeight: 1.2 }}>
+                Our mission: make real-world impact verifiable.
+              </h2>
+              <p className="muted" style={{ marginTop: 0 }}>
+                TrusToken turns everyday sustainable actions into credible, shareable proof. Upload what you did, let AI
+                verify the claim, then mint a Solana devnet certificate you can show, track, and celebrate.
+              </p>
+            </div>
+
+            <hr className="hr" />
+
+            <div className="kv">
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                  gap: 12,
+                }}
+              >
+                <div style={{ padding: 12, border: "1px solid rgba(255,255,255,0.10)", borderRadius: 14 }}>
+                  <div style={{ fontWeight: 700 }}>♻️ Recycling & Proper Sorting</div>
+                  <div className="muted" style={{ marginTop: 6 }}>
+                    Recycling, e-waste drop-off, correct bin sorting.
+                  </div>
+                </div>
+
+                <div style={{ padding: 12, border: "1px solid rgba(255,255,255,0.10)", borderRadius: 14 }}>
+                  <div style={{ fontWeight: 700 }}>🚲 Low-Carbon Transport</div>
+                  <div className="muted" style={{ marginTop: 6 }}>
+                    Biking, walking, public transit, carpooling.
+                  </div>
+                </div>
+
+                <div style={{ padding: 12, border: "1px solid rgba(255,255,255,0.10)", borderRadius: 14 }}>
+                  <div style={{ fontWeight: 700 }}>💡 Energy & Water Saving</div>
+                  <div className="muted" style={{ marginTop: 6 }}>
+                    LEDs, thermostat changes, shorter showers, unplugging devices.
+                  </div>
+                </div>
+
+                <div style={{ padding: 12, border: "1px solid rgba(255,255,255,0.10)", borderRadius: 14 }}>
+                  <div style={{ fontWeight: 700 }}>🗑️ Waste Reduction</div>
+                  <div className="muted" style={{ marginTop: 6 }}>
+                    Reusables, refills, repair/reuse, minimal packaging choices.
+                  </div>
+                </div>
+
+                <div style={{ padding: 12, border: "1px solid rgba(255,255,255,0.10)", borderRadius: 14 }}>
+                  <div style={{ fontWeight: 700 }}>🌱 Composting & Food Impact</div>
+                  <div className="muted" style={{ marginTop: 6 }}>
+                    Composting, reducing food waste, plant-forward meals.
+                  </div>
+                </div>
+
+                <div style={{ padding: 12, border: "1px solid rgba(255,255,255,0.10)", borderRadius: 14 }}>
+                  <div style={{ fontWeight: 700 }}>🧹 Community & Ecosystem Care</div>
+                  <div className="muted" style={{ marginTop: 6 }}>
+                    Community cleanups, tree planting, habitat-friendly actions.
+                  </div>
+                </div>
+              </div>
+
+              <div className="muted" style={{ marginTop: 12 }}>
+                Tip: Clear photos + specific descriptions help the verifier classify your contribution more accurately.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Entry form */}
+        <div className="card">
+          <div className="stack">
+            <div className="grid2">
+              <div className="kv">
+                <div className="label">Image</div>
+                <input className="input" type="file" accept="image/*" onChange={onFileChange} />
+                <div className="muted">Choose a photo of your action (recycling, transit, biking, etc.).</div>
+              </div>
+
+              <div className="kv">
+                <div className="label">Wallet (optional)</div>
+                <input
+                  className="input"
+                  placeholder="Solana address (optional)"
+                  value={wallet}
+                  onChange={(e) => setWallet(e.target.value)}
+                />
+                <div className="muted">If provided, the NFT will be minted to this address.</div>
+              </div>
             </div>
 
             <div className="kv">
-              <div className="label">Wallet (optional)</div>
-              <input
-                className="input"
-                placeholder="Solana address (optional)"
-                value={wallet}
-                onChange={(e) => setWallet(e.target.value)}
+              <div className="label">Description</div>
+              <textarea
+                className="textarea"
+                placeholder="Describe the sustainable action shown in the photo…"
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                rows={4}
               />
-              <div className="muted">If provided, the NFT will be minted to this address.</div>
-            </div>
-          </div>
-
-          <div className="kv">
-            <div className="label">Description</div>
-            <textarea
-              className="textarea"
-              placeholder="Describe the sustainable action shown in the photo…"
-              value={desc}
-              onChange={(e) => setDesc(e.target.value)}
-              rows={4}
-            />
-            <div className="muted">Tip: More detail → better AI summary.</div>
-          </div>
-
-          <hr className="hr" />
-
-          <div className="row" style={{ justifyContent: "space-between", flexWrap: "wrap" }}>
-            <div className="row">
-              <button className="btn" disabled={!canSubmit} onClick={onSubmit}>
-                {step === "uploading" ? "Submitting…" : "Verify + Mint"}
-              </button>
-              <button className="btnSecondary" onClick={onReset} disabled={step === "uploading"}>
-                Reset
-              </button>
+              <div className="muted">Tip: More detail → better AI summary.</div>
             </div>
 
-            <div className="muted" style={{ minHeight: 20 }}>
-              {status || "Upload an image and description to get a verified NFT certificate."}
+            <hr className="hr" />
+
+            <div className="row" style={{ justifyContent: "space-between", flexWrap: "wrap" }}>
+              <div className="row">
+                <button className="btn" disabled={!canSubmit} onClick={onSubmit}>
+                  {step === "uploading" ? "Submitting…" : "Verify + Mint"}
+                </button>
+                <button className="btnSecondary" onClick={onReset} disabled={step === "uploading"}>
+                  Reset
+                </button>
+              </div>
+
+              <div className="muted" style={{ minHeight: 20 }}>
+                {status || "Upload an image and description to get a verified NFT certificate."}
+              </div>
             </div>
           </div>
         </div>
